@@ -1,5 +1,7 @@
 <h1>CoopRKC — Prototipo de Consola (POO + Programación Funcional en Java)</h1>
-
+<p align="center">
+<img src="https://upload.wikimedia.org/wikipedia/en/thumb/3/30/Java_programming_language_logo.svg/121px-Java_programming_language_logo.svg.png" alt="CoopRKC Logo" width="140" align="center">
+</p>
 <blockquote>
   <p><strong>S25 - Evidencia de Aprendizaje · Unidad 2: Programación Funcional en Java</strong><br>
   <strong>Actividad 1 — Grupo 42</strong><br>
