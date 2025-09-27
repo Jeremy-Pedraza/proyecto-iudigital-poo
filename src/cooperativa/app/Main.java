@@ -4,6 +4,7 @@ import cooperativa.core.Cooperativa;
 import cooperativa.exceptions.CuentaDuplicadaExceptions;
 import cooperativa.exceptions.CuentaNoEncontradaException;
 import cooperativa.exceptions.SocioNoEncontradoException;
+import cooperativa.console.ConsoleScanner;
 import cooperativa.models.Cuenta;
 import cooperativa.models.CuentaAhorros;
 import cooperativa.models.Socio;
@@ -17,8 +18,9 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Main {
-
+    
     private static final Scanner SCANNER = new Scanner(System.in);
+    private static final ConsoleScanner PROMPTS = new ConsoleScanner(SCANNER);
     private static final Cooperativa COOPERATIVA = new Cooperativa("CoopRKC", "Calle PapiQuiero Piña");
 
     public static void main(String[] args) {
@@ -27,7 +29,7 @@ public class Main {
         while (seguir) {
             imprimirEncabezado();
             mostrarMenu();
-            String operacion = SCANNER.nextLine().trim();
+            String operacion = PROMPTS.pedirOpcionMenu();
             try {
                 switch (operacion) {
                     case "1" -> registrarSocio();
@@ -43,7 +45,7 @@ public class Main {
                     default -> System.out.println("Opción inválida.");
                 }
             } catch (Exception error) {
-                System.out.println("⚠️ Error: " + error.getMessage());
+                System.out.println("! Error: " + error.getMessage());
             }
             if (seguir) {
                 System.out.println("\nPresiona ENTER para continuar...");
@@ -96,24 +98,18 @@ public class Main {
 
     // 1) Registrar socio
     private static void registrarSocio() {
-        System.out.print("Nombre: ");
-        String nombre = SCANNER.nextLine().trim();
-        System.out.print("Cédula: ");
-        String cedula = SCANNER.nextLine().trim();
+        String nombre = PROMPTS.pedirNombre();
+        String cedula = PROMPTS.pedirCedula();
         COOPERATIVA.agregarSocio(new Socio(nombre, cedula));
         System.out.println("Socio registrado.");
     }
 
     // 2) Abrir cuenta de ahorros
     private static void abrirCuentaAhorros() throws SocioNoEncontradoException, CuentaDuplicadaExceptions {
-        System.out.print("Cédula del socio: ");
-        String cedula = SCANNER.nextLine().trim();
-        System.out.print("Número de cuenta: ");
-        String numero = SCANNER.nextLine().trim();
-        System.out.print("Saldo inicial: ");
-        BigDecimal saldoInicial = leerNumeroDecimal();
-        System.out.print("Tasa de interés anual (ejemplo. 1.5 para 1.5%): ");
-        BigDecimal tasaAnual = leerNumeroDecimal();
+        String cedula = PROMPTS.pedirCedula();
+        String numero = PROMPTS.pedirNumeroCuenta();
+        BigDecimal saldoInicial = PROMPTS.pedirMontoPositivo("Saldo inicial");
+        BigDecimal tasaAnual = PROMPTS.pedirTasaAnual();
 
         CuentaAhorros cuentaAhorros = new CuentaAhorros(numero, saldoInicial, LocalDateTime.now(), tasaAnual);
         COOPERATIVA.agregarCuentaASocio(cedula, cuentaAhorros);
@@ -122,10 +118,8 @@ public class Main {
 
     // 3) Depósito
     private static void depositar() throws CuentaNoEncontradaException, Exception {
-        System.out.print("Número de cuenta: ");
-        String numero = SCANNER.nextLine().trim();
-        System.out.print("Monto a depositar: ");
-        BigDecimal monto = leerNumeroDecimal();
+        String numero = PROMPTS.pedirNumeroCuenta();
+        BigDecimal monto = PROMPTS.pedirMontoPositivo("Monto a depositar");
 
         Cuenta cuenta = COOPERATIVA.buscarCuentaPorNumero(numero);
         Transaccion deposito = new Deposito(cuenta, monto);
@@ -135,10 +129,8 @@ public class Main {
 
     // 4) Retiro (con manejo de errores de saldo insuficiente)
     private static void retirar() throws CuentaNoEncontradaException {
-        System.out.print("Número de cuenta: ");
-        String numero = SCANNER.nextLine().trim();
-        System.out.print("Monto a retirar: ");
-        BigDecimal monto = leerNumeroDecimal();
+        String numero = PROMPTS.pedirNumeroCuenta();
+        BigDecimal monto = PROMPTS.pedirMontoPositivo("Monto a retirar");
 
         Cuenta cuenta = COOPERATIVA.buscarCuentaPorNumero(numero);
         Transaccion retiro = new Retiro(cuenta, monto);
@@ -186,11 +178,5 @@ public class Main {
             System.out.println("(Sin transacciones)");
         else
             historial.forEach(System.out::println);
-    }
-
-    // Utilidad: lectura robusta de Decimales (admite coma o punto)
-    private static BigDecimal leerNumeroDecimal() {
-        String valor = SCANNER.nextLine().trim().replace(",", ".");
-        return new BigDecimal(valor);
     }
 }
